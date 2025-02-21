@@ -59,6 +59,14 @@ async function run() {
         result = await taskCollection.find({addedBy: email}).toArray();
         socket.emit('tasks', result);
       })
+
+      socket.on('deleteTask', async(id) => {
+        const query = { _id: new ObjectId(id) }
+        const result = await taskCollection.deleteOne(query);
+        if(result.deletedCount){
+          socket.emit('taskDeleted');
+        }
+      })
     })
 
     // Send a ping to confirm a successful connection
