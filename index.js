@@ -53,6 +53,11 @@ async function run() {
         if(result.insertedId){
           socket.emit('taskAdded', 'Task Added')
         }
+      });
+
+      socket.on('getTasks', async(email) => {
+        result = await taskCollection.find({addedBy: email}).toArray();
+        socket.emit('tasks', result);
       })
     })
 
