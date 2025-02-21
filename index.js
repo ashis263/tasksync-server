@@ -33,6 +33,7 @@ async function run() {
     await client.connect();
     const userCollection = client.db('task-sync').collection('users');
     const taskCollection = client.db('task-sync').collection('tasks');
+    const activityCollection = client.db('task-sync').collection('activities');
 
     //user related api
     app.put('/users', async (req, res) => {
@@ -66,6 +67,15 @@ async function run() {
         if(result.deletedCount){
           socket.emit('taskDeleted');
         }
+      })
+
+      socket.on('modified', async(data) => {
+        const result = await activityCollection.insertOne(data);
+      })
+
+      socket.on('getActivities', async(email) => {
+        const result = await activityCollection.find({user: email}).sort({_id: -1}).toArray();
+        socket.emit('activities', result);
       })
     })
 
