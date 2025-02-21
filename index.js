@@ -31,6 +31,19 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const userCollection = client.db('task-sync').collection('users');
+
+    //user related api
+    app.put('/users', async (req, res) => {
+      const query = { email: req.body.email };
+      const updatedDoc = {
+        $set: req.body
+      };
+      const option = { upsert: true };
+      const result = await userCollection.updateOne(query, updatedDoc, option);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
