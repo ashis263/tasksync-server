@@ -8,7 +8,7 @@ const { createServer } = require("http");
 const app = express();
 const port = process.env.PORT || 5000;
 const server = createServer(app);
-const io = new Server(server, { cors: { origin: "http://localhost:5173/" } });
+const io = new Server(server, { cors: { origin: "http://localhost:5173" } });
 
 //middlewares
 app.use(cors());
@@ -32,6 +32,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const userCollection = client.db('task-sync').collection('users');
+    const taskCollection = client.db('task-sync').collection('tasks');
 
     //user related api
     app.put('/users', async (req, res) => {
@@ -43,6 +44,17 @@ async function run() {
       const result = await userCollection.updateOne(query, updatedDoc, option);
       res.send(result);
     });
+
+    io.on("connection", (socket) => {
+      console.log("User connected:", socket.id);
+
+      socket.on('addTask', async(task) => {
+        result = await taskCollection.insertOne(task);
+        if(result.insertedId){
+          socket.emit('taskAdded', 'Task Added')
+        }
+      })
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
