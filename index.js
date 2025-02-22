@@ -57,7 +57,7 @@ async function run() {
       });
 
       socket.on('getTasks', async(email) => {
-        result = await taskCollection.find({addedBy: email}).toArray();
+        result = await taskCollection.find({addedBy: email}).sort({_id: -1}).toArray();
         socket.emit('tasks', result);
       })
 
@@ -71,6 +71,18 @@ async function run() {
 
       socket.on('modified', async(data) => {
         const result = await activityCollection.insertOne(data);
+      })
+
+      socket.on("movedCategory", async(data) => {
+        const updatedDoc ={
+          $set: {
+            category: data.to
+          }
+        }
+        const result = await taskCollection.updateOne({_id: new ObjectId(data.id)}, updatedDoc);
+        if(result.modifiedCount){
+          socket.emit('categoryModified');
+        }
       })
 
       socket.on('getActivities', async(email) => {
