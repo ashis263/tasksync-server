@@ -4,6 +4,7 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { Server } = require("socket.io");
 const { createServer } = require("http");
+const { title } = require('process');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -82,6 +83,23 @@ async function run() {
         const result = await taskCollection.updateOne({_id: new ObjectId(data.id)}, updatedDoc);
         if(result.modifiedCount){
           socket.emit('categoryModified');
+        }
+      })
+
+      socket.on('update', async(data) => {
+        console.log(data);
+        const {oldId, ...other} = data;
+        const updatedDoc ={
+          $set: {
+            title: other.title,
+            description: other.description,
+            category: other.category,
+            deadline: other.deadline
+          }
+        }
+        const result = await taskCollection.updateOne({_id: new ObjectId(oldId)}, updatedDoc);
+        if(result.modifiedCount){
+          socket.emit('updated');
         }
       })
 
