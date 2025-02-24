@@ -89,6 +89,15 @@ async function run() {
       sendActivities(req.query.email);
     })
 
+    app.put('/tasks/:id', async (req, res) => {
+      const query = { _id: new ObjectId(req.params.id) }
+      const updatedDoc = {
+        $set: req.body
+      }
+      const result = await taskCollection.updateOne(query, updatedDoc);
+      sendTasks(req.query.email);
+    })
+
     //activity related
     app.post('/activities', async (req, res) => {
       result = await activityCollection.insertOne(req.body);
@@ -100,18 +109,6 @@ async function run() {
       res.send(result);
     })
 
-    //   socket.on('deleteTask', async (id) => {
-    //     const query = { _id: new ObjectId(id) }
-    //     const result = await taskCollection.deleteOne(query);
-    //     if (result.deletedCount) {
-    //       socket.emit('taskDeleted');
-    //     }
-    //   })
-
-    //   socket.on('modified', async (data) => {
-    //     const result = await activityCollection.insertOne(data);
-    //   })
-
     //   socket.on("movedCategory", async (data) => {
     //     const updatedDoc = {
     //       $set: {
@@ -121,23 +118,6 @@ async function run() {
     //     const result = await taskCollection.updateOne({ _id: new ObjectId(data.id) }, updatedDoc);
     //     if (result.modifiedCount) {
     //       socket.emit('categoryModified');
-    //     }
-    //   })
-
-    //   socket.on('update', async (data) => {
-    //     console.log(data);
-    //     const { oldId, ...other } = data;
-    //     const updatedDoc = {
-    //       $set: {
-    //         title: other.title,
-    //         description: other.description,
-    //         category: other.category,
-    //         deadline: other.deadline
-    //       }
-    //     }
-    //     const result = await taskCollection.updateOne({ _id: new ObjectId(oldId) }, updatedDoc);
-    //     if (result.modifiedCount) {
-    //       socket.emit('updated');
     //     }
     //   })
 
