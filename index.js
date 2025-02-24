@@ -61,13 +61,8 @@ async function run() {
     }
 
     //user related api
-    app.put('/users', async (req, res) => {
-      const query = { email: req.body.email };
-      const updatedDoc = {
-        $set: req.body
-      };
-      const option = { upsert: true };
-      const result = await userCollection.updateOne(query, updatedDoc, option);
+    app.post('/users', async (req, res) => {
+      const result = await userCollection.updateOne(req.body);
       res.send(result);
     });
 
