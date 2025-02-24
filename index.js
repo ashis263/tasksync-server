@@ -82,13 +82,20 @@ async function run() {
       sendTasks(req.body.addedBy);
     });
 
+    app.delete('/tasks/:id', async (req, res) => {
+      const query = { _id: new ObjectId(req.params.id) }
+      const result = await taskCollection.deleteOne(query);
+      sendTasks(req.query.email);
+      sendActivities(req.query.email);
+    })
+
     //activity related
     app.post('/activities', async (req, res) => {
       result = await activityCollection.insertOne(req.body);
       sendActivities(req.body.user);
     });
 
-    app.get('/activities', async(req, res) => {
+    app.get('/activities', async (req, res) => {
       const result = await activityCollection.find({ user: req.query.email }).sort({ _id: -1 }).toArray();
       res.send(result);
     })
