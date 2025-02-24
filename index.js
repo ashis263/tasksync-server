@@ -49,10 +49,15 @@ async function run() {
       });
     });
 
+    //functions to emit socket event
     const sendTasks = async (email) => {
       result = await taskCollection.find({ addedBy: email }).sort({ _id: -1 }).toArray();
       io.emit('tasks', result);
-      console.log(result);
+    }
+
+    const sendActivities = async (email) => {
+      const result = await activityCollection.find({ user: email }).sort({ _id: -1 }).toArray();
+      io.emit('activities', result);
     }
 
     //user related api
@@ -77,10 +82,16 @@ async function run() {
       sendTasks(req.body.addedBy);
     });
 
-    //   socket.on('getTasks', async (email) => {
-    //     result = await taskCollection.find({ addedBy: email }).sort({ _id: -1 }).toArray();
-    //     socket.emit('tasks', result);
-    //   })
+    //activity related
+    app.post('/activities', async (req, res) => {
+      result = await activityCollection.insertOne(req.body);
+      sendActivities(req.body.user);
+    });
+
+    app.get('/activities', async(req, res) => {
+      const result = await activityCollection.find({ user: req.query.email }).sort({ _id: -1 }).toArray();
+      res.send(result);
+    })
 
     //   socket.on('deleteTask', async (id) => {
     //     const query = { _id: new ObjectId(id) }
@@ -122,15 +133,6 @@ async function run() {
     //       socket.emit('updated');
     //     }
     //   })
-
-    //   socket.on('getActivities', async (email) => {
-    //     const result = await activityCollection.find({ user: email }).sort({ _id: -1 }).toArray();
-    //     socket.emit('activities', result);
-    //   })
-    //   socket.on('disconnect', () => {
-    //     console.log('User disconnected');
-    //   });
-    // })
 
 
     // Send a ping to confirm a successful connection
