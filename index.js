@@ -96,6 +96,26 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/taskOrder', async(req, res) => {
+      const email = req.query.email;
+      const { taskId, overId } = req.body;
+      const taskObjectId = new ObjectId(taskId);
+      const overObjectId = new ObjectId(overId);
+      const task = await taskCollection.findOne({_id: taskObjectId});
+      const over = await taskCollection.findOne({_id: overObjectId});
+
+      const newTask = {...task, _id: overObjectId};
+      const newOver = {...over, _id: taskObjectId};
+
+      await taskCollection.deleteOne({_id: taskObjectId});
+      await taskCollection.deleteOne({_id: overObjectId});
+
+      await taskCollection.insertOne(newTask);
+      await taskCollection.insertOne(newOver);
+      sendTasks(email);
+      res.send({ordered: true});
+    })
+
     //activity related
     app.post('/activities', async (req, res) => {
       result = await activityCollection.insertOne(req.body);
