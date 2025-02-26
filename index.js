@@ -75,6 +75,7 @@ async function run() {
     app.post('/tasks', async (req, res) => {
       result = await taskCollection.insertOne(req.body);
       sendTasks(req.body.addedBy);
+      res.send(result);
     });
 
     app.delete('/tasks/:id', async (req, res) => {
@@ -82,6 +83,7 @@ async function run() {
       const result = await taskCollection.deleteOne(query);
       sendTasks(req.query.email);
       sendActivities(req.query.email);
+      res.send(result);
     })
 
     app.put('/tasks/:id', async (req, res) => {
@@ -91,31 +93,20 @@ async function run() {
       }
       const result = await taskCollection.updateOne(query, updatedDoc);
       sendTasks(req.query.email);
+      res.send(result);
     })
 
     //activity related
     app.post('/activities', async (req, res) => {
       result = await activityCollection.insertOne(req.body);
       sendActivities(req.body.user);
+      res.send(result);
     });
 
     app.get('/activities', async (req, res) => {
       const result = await activityCollection.find({ user: req.query.email }).sort({ _id: -1 }).toArray();
       res.send(result);
     })
-
-    //   socket.on("movedCategory", async (data) => {
-    //     const updatedDoc = {
-    //       $set: {
-    //         category: data.to
-    //       }
-    //     }
-    //     const result = await taskCollection.updateOne({ _id: new ObjectId(data.id) }, updatedDoc);
-    //     if (result.modifiedCount) {
-    //       socket.emit('categoryModified');
-    //     }
-    //   })
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
